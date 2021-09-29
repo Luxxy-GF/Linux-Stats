@@ -8,7 +8,6 @@ const si = require('systeminformation');
 const os = require("os");
 const pretty = require('prettysize');
 const moment = require("moment");
-const speedTest = require('speedtest-net');
 const fs = require('fs');
 const config = require('./config.json')
 const exec = require('child_process').exec;
@@ -32,15 +31,8 @@ setInterval(() => {
     })
 }, 30000)
 
-//Issue speedtest on startup
-speedtest();
 fetchData();
 dockers();
-
-//Speedtest every 3hours, Then send that data to the panel to store.
-setInterval(async () => {
-    speedtest()
-}, 10800000);
 
 //Get data and store in the database
 setInterval(async () => {
@@ -72,14 +64,13 @@ app.get("/empty", (req, res) => {
 })
 
 app.get("/", (req, res) => {
-    res.send('Not sure what you expected to find here. This script just sends data to the panel and its all password protected so you can leave now :)')
+    res.send('Not sure what you expected to find here')
 });
 
 app.get('/stats', async function (req, res) {
     if (req.headers.password === config.password) {
         let data = {
             info: nodeData.fetch("data"),
-            speedtest: nodeData.fetch("data-speedtest"),
             docker: await si.dockerAll(),
             discord: nodeData.fetch('discord')
         }
@@ -174,21 +165,6 @@ async function fetchData() {
         updatetime: moment().format("YYYY-MM-DD HH:mm:ss")
     });
 }
-
-async function speedtest() {
-    var timestamp = `${moment().format("YYYY-MM-DD HH:mm:ss")}`;
-    const speed = await speedTest({ maxTime: 5000, server: 15423, acceptLicense: true, acceptGdpr: true })
-    speed.on('data', async (data) => {
-        nodeData.set('data-speedtest', {
-            speedname: os.hostname(),
-            ping: data.server.ping,
-            download: data.speeds.download,
-            upload: data.speeds.upload,
-            updatetime: timestamp
-        });
-    })
-}
-
 async function dockers() {
     const dockerAll = await si.dockerAll();
     dockerData.set('data', {
