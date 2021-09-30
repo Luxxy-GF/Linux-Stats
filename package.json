@@ -1,5 +1,5 @@
 {
-  "name": "servermonitor-fetch",
+  "name": "Linux-stats",
   "version": "1.0.1",
   "description": "A program that runs in system background to fetch data for the main ServerMonitor program.",
   "main": "index.js",
